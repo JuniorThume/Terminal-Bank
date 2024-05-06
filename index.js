@@ -8,6 +8,7 @@ import fs from 'fs';
 import { exit } from 'process';
 
 function operation() {
+    console.clear();
     inquirer.prompt({
         type: 'list',
         name: 'action',
@@ -28,6 +29,7 @@ function operation() {
                 break;
 
             case 'Consultar saldo':
+                getAccountBalance();
                 break;
 
             case 'Depositar':
@@ -35,12 +37,13 @@ function operation() {
                 break;
 
             case 'Sacar':
+                withDraw();
                 break;
             
             case 'Sair':
                 console.log(chalk.bgBlue.black('Obrigado por usar o Accounts'))
-                exit();
-                break;
+                process.exit();
+                
         }
         
     })
@@ -110,6 +113,9 @@ function deposit() {
             const amount  = answer['amount'];
 
 
+
+            addAmount(accountName, amount)
+
         })
         .catch(err => console.log(err))
         
@@ -148,6 +154,48 @@ function getAccount(accountName) {
     return JSON.parse(accountJSON)
 }
 
+function getAccountBalance() {
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'QUal eh o nome da sua conta?'
+        }
+    ])
+    .then(answer => {
+        const accountName = answer['accountName'];
+
+        if(!accountExists(accountName)) {
+            console.log(chalk.bgRed.black(''))
+            return getAccountBalance();
+        } else {
+            const accountData = getAccount(accountName);
+            console.log(chalk.bgBlue.black(`O saldo da conta {${accountName}} eh de R$ ${accountData.balance}`))
+        }
+
+        operation();
+    })
+    .catch(err => console.log(err))
+}
+
+function withDraw() {
+    inquirer.prompt([
+        {
+            name: 'accountName',
+            message: 'De qual conta voce deseja realizar o saque?'
+        }
+    ])
+    .then(answer => {
+        const accountName = answer['accountName'];
+
+        if(!accountExists(accountName)) {
+            console.log("Conta inexistente, tente novamente!");
+            withDraw();
+        }
+
+        inquirer
+    })
+    .catch(err => console.log(err))
+}
 
 // start program 
 
